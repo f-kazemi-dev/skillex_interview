@@ -1,0 +1,32 @@
+{
+  "name": "skillex_interview",
+  "version": "1.0.1",
+  "description": "This work is written in sample format, based on the information in README.md, and based on my own impressions.",
+  "main": "api.js",
+  "type": "module",
+  "scripts": {
+    "start": "node api.js",
+    "migrate": "node migrate.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.13.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.26.9",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f-kazemi-dev/skillex_interview.git"
+  },
+  "author": "f.kazemi.dev@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/f-kazemi-dev/skillex_interview/issues"
+  },
+  "homepage": "https://github.com/f-kazemi-dev/skillex_interview#readme"
+}

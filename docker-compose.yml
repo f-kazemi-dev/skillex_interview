@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  skillexdb:
+    image: mysql:8.0
+    container_name: skillex_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: skillex_db
+    ports:
+      - '3306:3306'
+    volumes:
+      - skillex_db_data:/var/lib/mysql
+
+volumes:
+  skillex_db_data:

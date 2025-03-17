@@ -118,8 +118,8 @@ async function prepareCombination(items, length) {// items = [1, 2, 3, 4, 5], le
 }
 console.log('---------------------', prepareCombination([1, 2, 1], 2));
 
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
+const PORT = process.env.APP_PORT || 3000;
+const HOST = process.env.APP_HOST || '0.0.0.0';
 app.listen(PORT, HOST, () => {
     console.log(`Server is running on http://${HOST}:${PORT}`);
 });

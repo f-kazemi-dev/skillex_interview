@@ -11,3 +11,4 @@ touch .env api.js migrate.js queries.js api.test.js docker-compose.yml TODO.md
 step 3. Designing a database `<dag design>` and converting it into a JavaScript executable file `<migrate.js, queries.js>`
 
 step 4.
+... develop and debug

@@ -39,14 +39,17 @@ app.post('/generate', async (req, res) => {
     await dbConn.beginTransaction();
     return await new Promise(async (resolve, reject) => {
       try {
-        const [result] = await dbConn.query(Query.INSERT_COMBINATION, [JSON.stringify(prpCombin)]);
+        const [itemResult] = await dbConn.query(Query.INSERT_ITEMS, [JSON.stringify(items), length, JSON.stringify(prpCombin.preparedTotalyItemsArray)]);
+        const itemId = itemResult.insertId;
+        const [result] = await dbConn.query(Query.INSERT_COMBINATION, [itemId, JSON.stringify(prpCombin.result)]);
         const combinationId = result.insertId;
-        await dbConn.query(Query.INSERT_RESPONSE, [combinationId]);
+        const preparedResponse = { id: combinationId, combination: prpCombin.result };
+        await dbConn.query(Query.INSERT_RESPONSE, [combinationId, JSON.stringify(preparedResponse)]);
         
-        console.log('Generated combination:', prpCombin);
+        // console.log('Generated combination:', prpCombin.result);
         resolve([
           await dbConn.commit(),
-          res.json({ id: combinationId, combination: prpCombin })
+          res.json(preparedResponse)
         ]);
       } catch (error) {
         console.error(error);
@@ -106,11 +109,20 @@ async function prepareCombination(items, length) {
     }
   };
 
-  normalizeAndFilterRepeated(Object.values(prepareTotalyItems), 0, [], result);
+  const preparedTotalyItemsArray = Object.values(prepareTotalyItems);
+  normalizeAndFilterRepeated(preparedTotalyItemsArray, 0, [], result);
+  // console.log("prepareTotalyItems", prepareTotalyItems);
 
-  return result;
+  console.log('Items:', items);
+  console.log('Length:', length);
+  console.log('Generated combination:', result);
+
+  return {
+    result, 
+    preparedTotalyItemsArray: preparedTotalyItemsArray ?? [],
+  };
 }
-// console.log('---------------------', prepareCombination([1, 2, 1], 2));
+console.log('---------------------', prepareCombination([1, 2, 1], 2));
 // console.log('---------------------', prepareCombination([1, 2, 1], 4));
 // console.log('---------------------', prepareCombination([1, 2, 1], 1));
 // console.log('---------------------', prepareCombination([1, 2, 7, 13], 4));

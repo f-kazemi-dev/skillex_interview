@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node api.js",
-    "migrate": "node migrate.js",
+    "migrate": "node migrate.js up",
+    "migrate:up": "node migrate.js up",
+    "migrate:down": "node migrate.js down",
     "test": "jest --runInBand"
   },
   "dependencies": {

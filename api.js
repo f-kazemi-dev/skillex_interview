@@ -27,7 +27,7 @@ const dbPoolConfig = {
 app.post('/generate', async (req, res) => {
   try {
     const { items, length } = req.body;
-    if (!items || !length) {
+    if (!items || !Array.isArray(items) || items.length === 0 || !length) {
         return res.status(400).send('Invalid input');
     }
 
@@ -43,6 +43,7 @@ app.post('/generate', async (req, res) => {
         const combinationId = result.insertId;
         await dbConn.query(Query.INSERT_RESPONSE, [combinationId]);
         
+        console.log('Generated combination:', prpCombin);
         resolve([
           await dbConn.commit(),
           res.json({ id: combinationId, combination: prpCombin })
@@ -54,7 +55,7 @@ app.post('/generate', async (req, res) => {
           res.status(500).send('Internal Server Error')
         ]);
       } finally {
-        await dbConn.end();// dbConn.release()
+        await dbConn.release();// dbConn.release()
       }
     });
   } catch (error) {
@@ -73,53 +74,54 @@ async function dbConnection() {
     }
   });
 }
-async function prepareCombination(items, length) {// items = [1, 2, 3, 4, 5], length = 3
+async function prepareCombination(items, length) {
   const result = [];
   const prepareTotalyItems = {};
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let index = 0;
 
   items.forEach(num => {
-    const itemChar = chars[index++];// because we have not 0
+    const itemChar = chars[index++];
     prepareTotalyItems[itemChar] = [];
-    for (let i = 1; i <= num; i++) {// because item have not 0 number
+    for (let i = 1; i <= num; i++) {
       prepareTotalyItems[itemChar].push(`${itemChar}${i}`);
     }
   });
 
-  // -------> filter totaly items and ensure result have not repeated items
-  const filterTotalyItems = (index, length, prefix, totalyItems) => {// here use closure function
-    if (prefix.length === length * 2) { // Each item has 2 characters
-      result.push(prefix);
+  const normalizeAndFilterRepeated = (reminedArray, beginOf, internalPreparedResult, finalResult) => {
+    if (internalPreparedResult.length === length) {
+      finalResult.push([...internalPreparedResult]);
       return;
     }
-
-    if (index >= chars.length) {
-      return;
+    let x = beginOf;
+    while (x < reminedArray.length) {
+      let y = 0;
+      while (y < reminedArray[x].length) {
+        internalPreparedResult.push(reminedArray[x][y]);
+        normalizeAndFilterRepeated(reminedArray, x + 1, internalPreparedResult, finalResult);
+        internalPreparedResult.pop();
+        y++;
+      }
+      x++;
     }
+  };
 
-    const itemChar = chars[index];
-    const items = totalyItems[itemChar];
-    if (!items) {
-      return;
-    }
-
-    for (let i = 0; i < items.length; i++) {
-      filterTotalyItems(index + 1, length, prefix + items[i], totalyItems);
-    }
-  }
-
-  console.log('prepareTotalyItems:', prepareTotalyItems);
-  filterTotalyItems(0, length, '', prepareTotalyItems);
-  console.log('result:', result);
-  // <------- filter totaly items and ensure result have not repeated items
+  normalizeAndFilterRepeated(Object.values(prepareTotalyItems), 0, [], result);
 
   return result;
 }
-console.log('---------------------', prepareCombination([1, 2, 1], 2));
+// console.log('---------------------', prepareCombination([1, 2, 1], 2));
+// console.log('---------------------', prepareCombination([1, 2, 1], 4));
+// console.log('---------------------', prepareCombination([1, 2, 1], 1));
+// console.log('---------------------', prepareCombination([1, 2, 7, 13], 4));
 
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
-app.listen(PORT, HOST, () => {
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, HOST, () => {
     console.log(`Server is running on http://${HOST}:${PORT}`);
-});
+  });
+}
+
+export default app;
